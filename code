@@ -1,0 +1,107 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_DEVICES 100
+
+// Structure to hold device information
+typedef struct {
+    int id;
+    char name[50];
+} Device;
+
+Device devices[MAX_DEVICES];
+int deviceCount = 0;
+
+// Function to add a new device
+void addDevice() {
+    if (deviceCount >= MAX_DEVICES) {
+        printf("Device list is full!\n");
+        return;
+    }
+
+    printf("Enter Device ID: ");
+    scanf("%d", &devices[deviceCount].id);
+    getchar();  // Consume newline left by scanf
+
+    printf("Enter Device Name: ");
+    fgets(devices[deviceCount].name, sizeof(devices[deviceCount].name), stdin);
+    devices[deviceCount].name[strcspn(devices[deviceCount].name, "\n")] = 0; // Remove newline
+
+    deviceCount++;
+    printf("Device added successfully!\n");
+}
+
+// Function to display all devices
+void displayDevices() {
+    if (deviceCount == 0) {
+        printf("No devices found.\n");
+        return;
+    }
+
+    printf("\nDevice List:\n");
+    for (int i = 0; i < deviceCount; i++) {
+        printf("ID: %d, Name: %s\n", devices[i].id, devices[i].name);
+    }
+}
+
+// Function to save devices to a file
+void saveToFile() {
+    FILE *file = fopen("devices.txt", "w");
+    if (file == NULL) {
+        printf("Error opening file for writing!\n");
+        return;
+    }
+
+    for (int i = 0; i < deviceCount; i++) {
+        fprintf(file, "%d,%s\n", devices[i].id, devices[i].name);
+    }
+
+    fclose(file);
+    printf("Devices saved successfully!\n");
+}
+
+// Function to load devices from a file
+void loadFromFile() {
+    FILE *file = fopen("devices.txt", "r");
+    if (file == NULL) {
+        printf("No previous data found.\n");
+        return;
+    }
+
+    deviceCount = 0;
+    while (fscanf(file, "%d,%49[^\n]\n", &devices[deviceCount].id, devices[deviceCount].name) == 2) {
+        deviceCount++;
+    }
+
+    fclose(file);
+    printf("Devices loaded successfully!\n");
+}
+
+// Main menu function
+void menu() {
+    int choice;
+    loadFromFile();
+
+    do {
+        printf("\nElectronic Device Manager\n");
+        printf("1. Add Device\n");
+        printf("2. Display Devices\n");
+        printf("3. Save and Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        getchar();  // Consume newline left by scanf
+
+        switch (choice) {
+            case 1: addDevice(); break;
+            case 2: displayDevices(); break;
+            case 3: saveToFile(); printf("Exiting...\n"); break;
+            default: printf("Invalid choice! Try again.\n");
+        }
+    } while (choice != 3);
+}
+
+int main() {
+    menu();
+    return 0;
+}
